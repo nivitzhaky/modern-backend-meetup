@@ -29,8 +29,8 @@ use: spring actuator <br>
 after project downloaded open it in intellij and copy src and pom.xml to the project you cloned from git <br>
 change spring version in pom.xml to 2.5.2 <br>
 run the project <br>
-check: http://localhost:8080/actuator/health
-
+check: http://localhost:8080/actuator/health <br>
+commit - initial version
 ### hello world
 controller/StudentsController.java
 ```java
@@ -75,6 +75,7 @@ public class SwaggerConfig {
     }
 }
 ```
-check: http://localhost:8080/swagger-ui.html#
+check: http://localhost:8080/swagger-ui.html#<br>
+commit - hello world
 ### DOCKER
 
