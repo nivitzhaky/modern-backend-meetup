@@ -14,7 +14,7 @@ phone: 0525236451<br>
 
 clone me:
 ```
-git clone git@github.com:nivitzhaky/modern-backend-meetup.git
+git clone https://github.com/nivitzhaky/modern-backend-meetup.git
 ```
 ### START a new project from intellij:
 use: start.spring.io <br>
@@ -538,5 +538,14 @@ sudo /usr/local/bin/docker-compose -f docker-compose-aws.yml up -d <br>
 if needed allow all traffic in security group <br>
 ### kubernetes
 apply patch kubernetes.patch<br>
+https://labs.play-with-k8s.com/ <br>
+yum install git -y <br>
+git clone https://github.com/nivitzhaky/modern-backend-meetup.git <br>
+cd modern-backend-meetup/src/main/resources/k8s <br>
+kubectl apply -f deployment-postgres.yml <br>
+kubectl apply -f postgres-service.yml <br>
+kubectl apply -f configmap.yml <br>       
+kubectl apply -f deployment.yml <br>
+kubectl apply -f service.yml  <br>
 
 
