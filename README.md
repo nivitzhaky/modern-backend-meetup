@@ -311,3 +311,117 @@ controller/StudentsController.java
     }
 ```
 commit - with students CRUD
+####simple filter
+StudentRepository.java
+```java
+    List<Student> findAllBySatScoreGreaterThan(Integer satScore);
+```
+
+
+StudentService.java
+```java
+    public List<Student> getStudentWithSatHigherThan(Integer sat) {
+        return repository.findAllBySatScoreGreaterThan(sat);
+    }
+```
+
+
+StudentController.java
+```java
+    @RequestMapping(value = "/highSat", method = RequestMethod.GET)
+    public ResponseEntity<?> getHighSatStudents(@RequestParam Integer sat)
+    {
+        return new ResponseEntity<>(studentService.getStudentWithSatHigherThan(sat), HttpStatus.OK);
+    }
+```
+
+####FPS
+apply fps.patch
+<br>
+model/StudentOut:
+```java
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Data;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.SqlResultSetMapping;
+import java.util.Date;
+
+@Data
+@Entity
+@SqlResultSetMapping(name = "StudentOut")
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class StudentOut {
+    @Id
+    private Long id;
+    private Date createdat;
+    private String fullname;
+    private Integer satscore;
+    private Double graduationscore;
+    private String phone;
+    private String profilepicture;
+}
+
+```
+
+model/StudentSortField.java
+```java
+public enum StudentSortField {
+    id("id") ,
+    createdAt ("created_at"),
+    fullName ("fullname"),
+    birthDate ("birth_date"),
+    satScore ("sat_score"),
+    graduationScore ("graduation_score"),
+    phone ("phone"),
+    profilepicture ("profile_picture");
+
+    public final String fieldName;
+    private StudentSortField(String fieldName) {
+        this.fieldName = fieldName;
+    }
+}
+```
+StudentsController.java
+```java
+    @Autowired
+    EntityManager em;
+
+    @Autowired
+    ObjectMapper om;
+
+    @RequestMapping(value = "", method = RequestMethod.GET)
+    public ResponseEntity<PaginationAndList> search(@RequestParam(required = false) String fullName,
+                                                    @RequestParam(required = false) Integer fromGraduationScore,
+                                                    @RequestParam(required = false) Integer toGraduationScore,
+                                                    @RequestParam(required = false) Integer fromSatScore,
+                                                    @RequestParam(required = false) Integer toSatScore,
+                                                    @RequestParam(defaultValue = "1") Integer page,
+                                                    @RequestParam(defaultValue = "50") @Min(1) Integer count,
+                                                    @RequestParam(defaultValue = "id") StudentSortField sort, @RequestParam(defaultValue = "asc") SortDirection sortDirection) throws JsonProcessingException {
+
+        var res =aFPS().select(List.of(
+                        aFPSField().field("id").alias("id").build(),
+                        aFPSField().field("created_at").alias("createdat").build(),
+                        aFPSField().field("fullname").alias("fullname").build(),
+                        aFPSField().field("sat_score").alias("satscore").build(),
+                        aFPSField().field("graduation_score").alias("graduationscore").build(),
+                        aFPSField().field("phone").alias("phone").build(),
+                        aFPSField().field("profile_picture").alias("profilepicture").build()
+                ))
+                .from(List.of(" student s"))
+                .conditions(List.of(
+                        aFPSCondition().condition("( lower(fullname) like :fullName )").parameterName("fullName").value(likeLowerOrNull(fullName)).build(),
+                        aFPSCondition().condition("( graduation_score >= :fromGraduationScore )").parameterName("fromGraduationScore").value(fromGraduationScore).build(),
+                        aFPSCondition().condition("( graduation_score <= :toGraduationScore )").parameterName("toGraduationScore").value(toGraduationScore).build(),
+                        aFPSCondition().condition("( sat_score >= :fromSatScore )").parameterName("fromSatScore").value(fromSatScore).build(),
+                        aFPSCondition().condition("( sat_score <= :toSatScore )").parameterName("toSatScore").value(toSatScore).build()
+                )).sortField(sort.fieldName).sortDirection(sortDirection).page(page).count(count)
+                .itemClass(StudentOut.class)
+                .build().exec(em, om);
+        return ResponseEntity.ok(res);
+    }
+
+```
+commit - with FPS
