@@ -487,3 +487,20 @@ StudentSortField.java
     avgScore (" (select avg(sg.course_score) from  student_grade sg where sg.student_id = s.id ) ");
 ```
 commit - with one to many
+### Dockerize
+apply dockerize.patch<br>
+run maven package ->SKIP THE TESTS<br>
+docker build . -t backend
+<br>
+in repository settings -> secrets, add <br>
+DOCKERHUB_USERNAME = nivitzhaky<br>
+DOCKERHUB_TOKEN = dckr_pat_wNsuA4lJiuBnc4iCsNCmxjCVjc4<br>
+docker login
+<br>
+nivitzhaky
+<br>
+Jul201789#
+<br>
+docker tag backend  nivitzhaky/backend:001
+<br>
+docker-compose -f docker-compose-aws.yml up -d

@@ -1,0 +1,17 @@
+version: "3"
+services:
+  appserver:
+    container_name: server
+    hostname: localhost
+    image: nivitzhaky/backend:001
+    ports:
+      - "8080:8080"
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    privileged: true
