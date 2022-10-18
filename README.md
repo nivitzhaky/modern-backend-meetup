@@ -104,3 +104,89 @@ connect with tableplus - hostname postgres
 cat /etc/hosts
 <br>
 commit - with docker compose
+### SPRING DATA
+#### Spring DATA
+pom.xml
+```
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>6.1.5.Final</version>
+		</dependency>
+
+```
+application.properties
+```
+spring.datasource.url=jdbc:postgresql://postgres:5432/postgres
+spring.datasource.username=postgres
+spring.datasource.password=postgres
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+```
+model/Student.java
+```java
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
+
+import javax.persistence.*;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import java.io.Serializable;
+import java.util.Date;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Entity
+@Table(name="student")
+public class Student implements Serializable {
+    private static final long serialVersionUID = 1L;
+    @Id
+    @GeneratedValue(strategy= GenerationType.AUTO)
+    private Long id;
+
+    @NotNull
+    @Column(nullable = false, updatable = false)
+    private Date createdAt = new Date();
+
+    @NotEmpty
+    @Length(max = 60)
+    private String fullname;
+
+
+    @Min(100)
+    @Max(800)
+    private Integer satScore;
+
+    @Min(30)
+    @Max(110)
+    private Double graduationScore;
+
+    @Length(max = 20)
+    private String phone;
+
+    @Length(max = 500)
+    private String profilePicture;
+}
+
+```
+commit - with spring data
