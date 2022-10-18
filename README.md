@@ -78,4 +78,29 @@ public class SwaggerConfig {
 check: http://localhost:8080/swagger-ui.html#<br>
 commit - hello world
 ### DOCKER
-
+```
+docker run -d -p 5432:5432 -v postgresdata:/var/lib/postgresql/data -e POSTGRES_PASSWORD=postgres postgres
+docker ps
+docker logs [containerid]
+```
+docker-compose.yml
+```
+version: "3"
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports:
+    - 5432:5432
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    privileged: true
+```
+docker-compose up -d
+<br>
+connect with tableplus - hostname postgres
+<br>
+cat /etc/hosts
+<br>
+commit - with docker compose
