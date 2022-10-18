@@ -425,3 +425,65 @@ StudentsController.java
 
 ```
 commit - with FPS
+### OneToMany grades
+apply one_to_many_grades.patch
+<br>
+Student.java
+```java
+    @OneToMany(mappedBy = "student", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    private Collection<StudentGrade> studentGrades = new ArrayList<>();
+```
+StudentOut.java
+```java
+    private Double avgscore;
+```
+StudentsController.java
+```java
+    @RequestMapping(value = "", method = RequestMethod.GET)
+    public ResponseEntity<PaginationAndList> search(@RequestParam(required = false) String fullName,
+                                                    @RequestParam(required = false) Integer fromGraduationScore,
+                                                    @RequestParam(required = false) Integer toGraduationScore,
+                                                    @RequestParam(required = false) Integer fromSatScore,
+                                                    @RequestParam(required = false) Integer toSatScore,
+                                                    @RequestParam(required = false) Integer fromAvgScore,
+                                                    @RequestParam(defaultValue = "1") Integer page,
+                                                    @RequestParam(defaultValue = "50") @Min(1) Integer count,
+                                                    @RequestParam(defaultValue = "id") StudentSortField sort, @RequestParam(defaultValue = "asc") SortDirection sortDirection) throws JsonProcessingException {
+
+        var res =aFPS().select(List.of(
+                        aFPSField().field("s.id").alias("id").build(),
+                        aFPSField().field("s.created_at").alias("createdat").build(),
+                        aFPSField().field("s.fullname").alias("fullname").build(),
+                        aFPSField().field("s.sat_score").alias("satscore").build(),
+                        aFPSField().field("s.graduation_score").alias("graduationscore").build(),
+                        aFPSField().field("s.phone").alias("phone").build(),
+                        aFPSField().field("s.profile_picture").alias("profilepicture").build(),
+                        aFPSField().field("(select avg(sg.course_score) from  student_grade sg where sg.student_id = s.id ) ").alias("avgscore").build()
+                ))
+                .from(List.of(" student s"))
+                .conditions(List.of(
+                        aFPSCondition().condition("( lower(fullname) like :fullName )").parameterName("fullName").value(likeLowerOrNull(fullName)).build(),
+                        aFPSCondition().condition("( graduation_score >= :fromGraduationScore )").parameterName("fromGraduationScore").value(fromGraduationScore).build(),
+                        aFPSCondition().condition("( graduation_score <= :toGraduationScore )").parameterName("toGraduationScore").value(toGraduationScore).build(),
+                        aFPSCondition().condition("( sat_score >= :fromSatScore )").parameterName("fromSatScore").value(fromSatScore).build(),
+                        aFPSCondition().condition("( sat_score <= :toSatScore )").parameterName("toSatScore").value(toSatScore).build(),
+                        aFPSCondition().condition("( (select avg(sg.course_score) from  student_grade sg where sg.student_id = s.id ) >= :fromAvgScore )").parameterName("fromAvgScore").value(fromAvgScore).build()
+                )).sortField(sort.fieldName).sortDirection(sortDirection).page(page).count(count)
+                .itemClass(StudentOut.class)
+                .build().exec(em, om);
+        return ResponseEntity.ok(res);
+    }
+
+```
+StudentSortField.java
+```java
+    id("s.id") ,
+    createdAt ("s.created_at"),
+    fullName ("s.fullname"),
+    satScore ("s.at_score"),
+    graduationScore ("s.graduation_score"),
+    phone ("s.phone"),
+    profilepicture ("s.profile_picture"),
+    avgScore (" (select avg(sg.course_score) from  student_grade sg where sg.student_id = s.id ) ");
+```
+commit - with one to many
