@@ -190,3 +190,124 @@ public class Student implements Serializable {
 
 ```
 commit - with spring data
+### CRUD
+repo/StudentRepository.java
+```java
+public interface StudentRepository extends CrudRepository<Student,Long> {
+}
+```
+service/StudentService.java
+```java
+@Service
+public class StudentService {
+
+    @Autowired
+    StudentRepository repository;
+
+    public Iterable<Student> all() {
+        return repository.findAll();
+    }
+
+    public Optional<Student> findById(Long id) {
+        return repository.findById(id);
+    }
+
+
+    public Student save(Student student) {
+        return repository.save(student);
+    }
+
+    public void delete(Student student) {
+        repository.delete(student);
+    }
+
+}
+```
+model/StudentIn.java
+```java
+import lombok.Data;
+import org.hibernate.validator.constraints.Length;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import java.io.Serializable;
+import java.util.Date;
+
+@Data
+public class StudentIn implements Serializable {
+
+    @Length(max = 60)
+    private String fullname;
+
+    @Min(100)
+    @Max(800)
+    private Integer satScore;
+
+    @Min(30)
+    @Max(110)
+    private Double graduationScore;
+
+    @Length(max = 20)
+    private String phone;
+
+
+    public Student toStudent() {
+        return Student.builder().createdAt(new Date()).fullname(fullname)
+                .satScore(satScore).graduationScore(graduationScore)
+                .phone(phone)
+                .build();
+    }
+
+    public void updateStudent(Student student) {
+        student.setFullname(fullname);
+        student.setSatScore(satScore);
+        student.setGraduationScore(graduationScore);
+        student.setPhone(phone);
+    }
+
+}
+```
+controller/StudentsController.java
+```java
+    @Autowired
+    StudentService studentService;
+
+    @RequestMapping(value = "", method = RequestMethod.GET)
+    public ResponseEntity<?> getAllStudents()
+    {
+        return new ResponseEntity<>(studentService.all(), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
+    public ResponseEntity<?> getOneStudent(@PathVariable Long id)
+    {
+        return new ResponseEntity<>(studentService.findById(id), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "", method = RequestMethod.POST)
+    public ResponseEntity<?> insertStudent(@RequestBody StudentIn studentIn)
+    {
+        Student student = studentIn.toStudent();
+        student = studentService.save(student);
+        return new ResponseEntity<>(student, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+    public ResponseEntity<?> updateStudent(@PathVariable Long id, @RequestBody StudentIn student)
+    {
+        Optional<Student> dbStudent = studentService.findById(id);
+        if (dbStudent.isEmpty()) throw new RuntimeException("Student with id: " + id + " not found");
+        student.updateStudent(dbStudent.get());
+        Student updatedStudent = studentService.save(dbStudent.get());
+        return new ResponseEntity<>(updatedStudent, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteStudent(@PathVariable Long id)
+    {
+        Optional<Student> dbStudent = studentService.findById(id);
+        if (dbStudent.isEmpty()) throw new RuntimeException("Student with id: " + id + " not found");
+        studentService.delete(dbStudent.get());
+        return new ResponseEntity<>("DELETED", HttpStatus.OK);
+    }
+```
+commit - with students CRUD
