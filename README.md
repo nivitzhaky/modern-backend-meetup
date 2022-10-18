@@ -504,3 +504,39 @@ Jul201789#
 docker tag backend  nivitzhaky/backend:001
 <br>
 docker-compose -f docker-compose-aws.yml up -d
+### EC2
+```
+sudo yum update -y
+sudo yum install -y docker
+sudo service docker start
+sudo curl -L https://github.com/docker/compose/releases/download/1.22.0/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+```
+docker-compose
+```
+echo "
+version: \"3\"
+services:
+  appserver:
+    container_name: server
+    hostname: localhost
+    image: nivitzhaky/backend:001
+    ports:
+      - "8080:8080"
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports:
+    - 5432:5432
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    privileged: true
+" >>  docker-compose-aws.yml
+```
+sudo /usr/local/bin/docker-compose -f docker-compose-aws.yml up -d <br>
+if needed allow all traffic in security group <br>
+### kubernetes
+apply patch kubernetes.patch<br>
+
+

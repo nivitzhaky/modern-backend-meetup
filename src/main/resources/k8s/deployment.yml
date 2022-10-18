@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-deployment
+  labels:
+    app: spring
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: spring
+  template:
+    metadata:
+      labels:
+        app: spring
+    spec:
+      containers:
+        - name: spring
+          image: nivitzhaky/backend:001
+          ports:
+            - containerPort: 8080
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            failureThreshold: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            failureThreshold: 5
+            initialDelaySeconds: 40
+            periodSeconds: 5
+          volumeMounts:
+            - name: application-config
+              mountPath: "/opt/conf"
+              readOnly: true
+      volumes:
+        - name: application-config
+          configMap:
+            name: postgres-app-config
+            items:
+              - key: application.properties
+                path: application.properties

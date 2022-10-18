@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: postgres
+    openshift.io/deployment-config.name: postgres
+    template: postgresql-ephemeral-template
+  name: postgres-1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+        name: postgres
+    spec:
+      containers:
+        - env:
+            - name: POSTGRESQL_USER
+              value: postgres
+            - name: POSTGRESQL_PASSWORD
+              value: postgres
+            - name: POSTGRESQL_DATABASE
+              value: postgres
+          image: >-
+            centos/postgresql-95-centos7@sha256:d459c9bb18ec7de443fbe4dd31cff26bdc6fdc681363922e97ae2f40e64a93c1
+          imagePullPolicy: IfNotPresent
+          name: postgresql
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /var/lib/pgsql/data
+              name: postgres-data
+      volumes:
+        - emptyDir: {}
+          name: postgres-data

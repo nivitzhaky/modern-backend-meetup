@@ -1,0 +1,178 @@
+Index: src/main/resources/k8s/configmap.yml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/resources/k8s/configmap.yml b/src/main/resources/k8s/configmap.yml
+new file mode 100644
+--- /dev/null	(date 1666131713876)
++++ b/src/main/resources/k8s/configmap.yml	(date 1666131713876)
+@@ -0,0 +1,22 @@
++apiVersion: v1
++data:
++  application.properties: |-
++    spring.datasource.url=jdbc:postgresql://postgres:5432/postgres
++    spring.datasource.username=postgres
++    spring.datasource.password=postgres
++    spring.datasource.driver-class-name=org.postgresql.Driver
++
++    #JPA properties
++    spring.jpa.show-sql = true
++    spring.jpa.hibernate.ddl-auto = update
++    spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
++
++    management.endpoint.env.enabled: true
++    management.endpoints.web.exposure.include: env,health,info
++
++    test.cm=working
++
++
++kind: ConfigMap
++metadata:
++  name: postgres-app-config
+Index: src/main/resources/k8s/service.yml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/resources/k8s/service.yml b/src/main/resources/k8s/service.yml
+new file mode 100644
+--- /dev/null	(date 1666131533648)
++++ b/src/main/resources/k8s/service.yml	(date 1666131533648)
+@@ -0,0 +1,10 @@
++apiVersion: v1
++kind: Service
++metadata:
++  name: my-service
++spec:
++  ports:
++    - name: http
++      port: 8080
++  selector:
++    app: spring
+Index: src/main/resources/k8s/postgres-service.yml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/resources/k8s/postgres-service.yml b/src/main/resources/k8s/postgres-service.yml
+new file mode 100644
+--- /dev/null	(date 1666131533644)
++++ b/src/main/resources/k8s/postgres-service.yml	(date 1666131533644)
+@@ -0,0 +1,10 @@
++apiVersion: v1
++kind: Service
++metadata:
++  name: postgres
++spec:
++  ports:
++    - name: http
++      port: 5432
++  selector:
++    app: postgres
+Index: src/main/resources/k8s/deployment-postgres.yml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/resources/k8s/deployment-postgres.yml b/src/main/resources/k8s/deployment-postgres.yml
+new file mode 100644
+--- /dev/null	(date 1666131533640)
++++ b/src/main/resources/k8s/deployment-postgres.yml	(date 1666131533640)
+@@ -0,0 +1,40 @@
++apiVersion: apps/v1
++kind: Deployment
++metadata:
++  labels:
++    app: postgres
++    openshift.io/deployment-config.name: postgres
++    template: postgresql-ephemeral-template
++  name: postgres-1
++spec:
++  replicas: 1
++  selector:
++    matchLabels:
++      app: postgres
++  template:
++    metadata:
++      labels:
++        app: postgres
++        name: postgres
++    spec:
++      containers:
++        - env:
++            - name: POSTGRESQL_USER
++              value: postgres
++            - name: POSTGRESQL_PASSWORD
++              value: postgres
++            - name: POSTGRESQL_DATABASE
++              value: postgres
++          image: >-
++            centos/postgresql-95-centos7@sha256:d459c9bb18ec7de443fbe4dd31cff26bdc6fdc681363922e97ae2f40e64a93c1
++          imagePullPolicy: IfNotPresent
++          name: postgresql
++          ports:
++            - containerPort: 5432
++              protocol: TCP
++          volumeMounts:
++            - mountPath: /var/lib/pgsql/data
++              name: postgres-data
++      volumes:
++        - emptyDir: {}
++          name: postgres-data
+Index: src/main/resources/k8s/deployment.yml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/resources/k8s/deployment.yml b/src/main/resources/k8s/deployment.yml
+new file mode 100644
+--- /dev/null	(date 1666131713881)
++++ b/src/main/resources/k8s/deployment.yml	(date 1666131713881)
+@@ -0,0 +1,46 @@
++apiVersion: apps/v1
++kind: Deployment
++metadata:
++  name: spring-deployment
++  labels:
++    app: spring
++spec:
++  replicas: 2
++  selector:
++    matchLabels:
++      app: spring
++  template:
++    metadata:
++      labels:
++        app: spring
++    spec:
++      containers:
++        - name: spring
++          image: nivitzhaky/backend:001
++          ports:
++            - containerPort: 8080
++              name: http
++          readinessProbe:
++            httpGet:
++              path: /actuator/health
++              port: 8080
++            failureThreshold: 5
++            periodSeconds: 5
++          livenessProbe:
++            httpGet:
++              path: /actuator/health
++              port: 8080
++            failureThreshold: 5
++            initialDelaySeconds: 40
++            periodSeconds: 5
++          volumeMounts:
++            - name: application-config
++              mountPath: "/opt/conf"
++              readOnly: true
++      volumes:
++        - name: application-config
++          configMap:
++            name: postgres-app-config
++            items:
++              - key: application.properties
++                path: application.properties

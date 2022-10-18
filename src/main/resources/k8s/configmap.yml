@@ -1,0 +1,22 @@
+apiVersion: v1
+data:
+  application.properties: |-
+    spring.datasource.url=jdbc:postgresql://postgres:5432/postgres
+    spring.datasource.username=postgres
+    spring.datasource.password=postgres
+    spring.datasource.driver-class-name=org.postgresql.Driver
+
+    #JPA properties
+    spring.jpa.show-sql = true
+    spring.jpa.hibernate.ddl-auto = update
+    spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+
+    management.endpoint.env.enabled: true
+    management.endpoints.web.exposure.include: env,health,info
+
+    test.cm=working
+
+
+kind: ConfigMap
+metadata:
+  name: postgres-app-config
