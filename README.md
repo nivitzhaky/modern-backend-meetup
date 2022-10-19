@@ -10,11 +10,11 @@ phone: 0525236451<br>
 
 ## Follow the steps below to run the project
 
-### GIT
+### GIT - YOU NEED TO FORK THE REPO AND CLONE IT TO YOUR LOCAL MACHINE
 
-clone me:
+FORK AND THEN CLONE:
 ```
-git clone https://github.com/nivitzhaky/modern-backend-meetup.git
+https://github.com/nivitzhaky/modern-backend-meetup.git
 ```
 ### START a new project from intellij:
 use: start.spring.io <br>
