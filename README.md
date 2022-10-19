@@ -367,7 +367,7 @@ public class StudentOut {
 
 model/StudentSortField.java
 ```java
-public enum StudentSortField {
+`public enum StudentSortField {
     id("id") ,
     createdAt ("created_at"),
     fullName ("fullname"),
@@ -382,7 +382,7 @@ public enum StudentSortField {
         this.fieldName = fieldName;
     }
 }
-```
+````
 StudentsController.java
 ```java
     @Autowired
