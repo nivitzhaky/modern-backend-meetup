@@ -2,7 +2,7 @@
 
 ## What is this?
 this is a repository for the modern backend meetup <br>
-link to the meetup: https://www.meetup.com/dev-online-helpers-israel/events/288802121/ <br>
+link to the meetup recording: https://tinyurl.com/yytsbbwv <br>
 Created by [Niv Itzhaky] - Mentor & Backend expert <br>
 linked in- https://www.linkedin.com/in/nivitzhaky/ <br>
 email- niv.itzhaky@gmail.com <br>
