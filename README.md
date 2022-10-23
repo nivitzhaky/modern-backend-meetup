@@ -2,7 +2,7 @@
 
 ## What is this?
 this is a repository for the modern backend meetup <br>
-link to the meetup recording: https://tinyurl.com/yytsbbwv <br>
+link to the meetup recording: https://youtu.be/0nc9PsfzrkA <br>
 Created by [Niv Itzhaky] - Mentor & Backend expert <br>
 linked in- https://www.linkedin.com/in/nivitzhaky/ <br>
 email- niv.itzhaky@gmail.com <br>
